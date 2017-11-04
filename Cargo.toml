@@ -1,0 +1,15 @@
+[package]
+authors = ["Greizgh <greizgh@ephax.org>"]
+name = "gru"
+version = "0.1.0"
+[dependencies]
+clap = "^2.27.1"
+dotenv = "^0.10.1"
+
+[dependencies.diesel]
+features = ["sqlite"]
+version = "^0.16.0"
+
+[dependencies.diesel_codegen]
+features = ["sqlite"]
+version = "^0.16.0"
