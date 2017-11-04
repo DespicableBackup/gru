@@ -3,8 +3,10 @@ authors = ["Greizgh <greizgh@ephax.org>"]
 name = "gru"
 version = "0.1.0"
 [dependencies]
+base64 = "^0.7.0"
 clap = "^2.27.1"
 dotenv = "^0.10.1"
+rand = "^0.3.17"
 
 [dependencies.diesel]
 features = ["sqlite"]

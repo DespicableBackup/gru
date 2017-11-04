@@ -2,6 +2,8 @@
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
 extern crate clap;
+extern crate rand;
+extern crate base64;
 
 mod db;
 mod cli;
@@ -9,21 +11,33 @@ mod models;
 mod schema;
 
 use diesel::prelude::*;
+use rand::{OsRng, Rng};
+use base64::encode;
 
 const APP_NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+const KEY_LENGTH: usize = 64;
 
 fn create_minion(conn: &SqliteConnection, name: &str) {
     use schema::minions;
 
+    let mut rng = OsRng::new().expect("Could not get a proper random generator");
+    let mut buf: Vec<u8> = vec![0; KEY_LENGTH];
+    rng.fill_bytes(&mut buf);
+
+    let key = encode(&buf);
+
     let minion = models::NewMinion {
         name: name,
+        key: &key,
     };
 
     diesel::insert(&minion)
         .into(minions::table)
         .execute(conn)
         .expect("Error saving new minion");
+
+    println!("Minion API key: {}", key);
 }
 
 fn list_minions(conn: &SqliteConnection) {
