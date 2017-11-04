@@ -40,8 +40,16 @@ fn create_minion(conn: &SqliteConnection, name: &str) {
     println!("Minion API key: {}", key);
 }
 
+fn delete_minion(conn: &SqliteConnection, name: &str) {
+    use schema::minions::dsl;
+
+    diesel::delete(dsl::minions.filter(dsl::name.eq(name)))
+        .execute(conn)
+        .expect("Error deleting minion");
+}
+
 fn list_minions(conn: &SqliteConnection) {
-    use self::schema::minions::dsl::*;
+    use schema::minions::dsl::*;
     let results :Vec<models::Minion> = minions.load(conn).expect("Could not retrieve minions");
 
     for minion in results {
@@ -60,5 +68,9 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("create") {
         create_minion(&connection, matches.value_of("NAME").unwrap());
+    }
+
+    if let Some(matches) = matches.subcommand_matches("delete") {
+        delete_minion(&connection, matches.value_of("NAME").unwrap());
     }
 }
