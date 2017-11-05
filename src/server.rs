@@ -1,5 +1,6 @@
-use diesel::prelude::*;
 use rocket;
+
+use db::Pool;
 
 #[post("/register")]
 fn register() -> &'static str {
@@ -11,7 +12,7 @@ fn unregister() -> &'static str {
     "Fine"
 }
 
-pub fn serve(conn: &SqliteConnection) {
+pub fn serve(pool: Pool) {
     rocket::ignite()
         .mount("/", routes![register, unregister])
         .launch();

@@ -8,6 +8,8 @@ extern crate clap;
 extern crate rand;
 extern crate base64;
 extern crate rocket;
+extern crate r2d2;
+extern crate r2d2_diesel;
 
 mod db;
 mod cli;
@@ -65,21 +67,24 @@ fn list_minions(conn: &SqliteConnection) {
 fn main() {
     let matches = cli::get_app(APP_NAME, VERSION).get_matches();
 
-    let connection = db::connect();
+    let pool = db::connect();
 
     if let Some(_) = matches.subcommand_matches("list") {
+        let connection = pool.get().unwrap();
         list_minions(&connection);
     }
 
     if let Some(matches) = matches.subcommand_matches("create") {
+        let connection = pool.get().unwrap();
         create_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
     if let Some(matches) = matches.subcommand_matches("delete") {
+        let connection = pool.get().unwrap();
         delete_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
     if let Some(_) = matches.subcommand_matches("serve") {
-        server::serve(&connection);
+        server::serve(pool);
     }
 }
