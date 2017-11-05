@@ -1,14 +1,19 @@
+#![feature(plugin)]
+#![plugin(rocket_codegen)]
+
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate diesel_codegen;
 extern crate dotenv;
 extern crate clap;
 extern crate rand;
 extern crate base64;
+extern crate rocket;
 
 mod db;
 mod cli;
 mod models;
 mod schema;
+mod server;
 
 use diesel::prelude::*;
 use rand::{OsRng, Rng};
@@ -72,5 +77,9 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("delete") {
         delete_minion(&connection, matches.value_of("NAME").unwrap());
+    }
+
+    if let Some(_) = matches.subcommand_matches("serve") {
+        server::serve(&connection);
     }
 }

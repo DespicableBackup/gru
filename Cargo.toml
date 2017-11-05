@@ -7,6 +7,8 @@ base64 = "^0.7.0"
 clap = "^2.27.1"
 dotenv = "^0.10.1"
 rand = "^0.3.17"
+rocket = "^0.3.3"
+rocket_codegen = "^0.3.3"
 
 [dependencies.diesel]
 features = ["sqlite"]
