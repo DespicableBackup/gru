@@ -25,14 +25,18 @@ const APP_NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const KEY_LENGTH: usize = 64;
 
-fn create_minion(conn: &SqliteConnection, name: &str) {
-    use schema::minions;
-
+fn generate_key() -> String {
     let mut rng = OsRng::new().expect("Could not get a proper random generator");
     let mut buf: Vec<u8> = vec![0; KEY_LENGTH];
     rng.fill_bytes(&mut buf);
 
-    let key = encode(&buf);
+    encode(&buf)
+}
+
+fn create_minion(conn: &SqliteConnection, name: &str) {
+    use schema::minions;
+
+    let key = generate_key();
 
     let minion = models::NewMinion {
         name: name,
@@ -76,6 +80,22 @@ fn revoke_minion(conn: &SqliteConnection, name: &str) {
         .expect(&format!("Could not revoke {}", name));
 }
 
+fn regen_minion(conn: &SqliteConnection, name: &str) {
+    use schema::minions::dsl;
+
+    let key = generate_key();
+
+    let minion = diesel::update(dsl::minions.filter(dsl::name.eq(name)))
+        .set(&models::UpdateMinion {
+            // Disable the minion as the key may have been compromised
+            active: Some(false),
+            key: Some(Some(&key))
+        })
+        .execute(conn)
+        .expect(&format!("Could not revoke {}", name));
+    println!("New key: {}", key);
+}
+
 fn main() {
     let matches = cli::get_app(APP_NAME, VERSION).get_matches();
 
@@ -102,7 +122,8 @@ fn main() {
     }
 
     if let Some(matches) = matches.subcommand_matches("regenerate") {
-        panic!("Not implemented");
+        let connection = pool.get().unwrap();
+        regen_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
     if let Some(_) = matches.subcommand_matches("serve") {

@@ -10,9 +10,9 @@ pub struct Minion {
 
 #[derive(AsChangeset)]
 #[table_name="minions"]
-pub struct UpdateMinion {
+pub struct UpdateMinion<'a> {
     pub active: Option<bool>,
-    pub key: Option<Option<String>>,
+    pub key: Option<Option<&'a str>>,
 }
 
 #[derive(Insertable)]
