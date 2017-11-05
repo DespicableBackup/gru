@@ -64,6 +64,18 @@ fn list_minions(conn: &SqliteConnection) {
     }
 }
 
+fn revoke_minion(conn: &SqliteConnection, name: &str) {
+    use schema::minions::dsl;
+
+    let minion = diesel::update(dsl::minions.filter(dsl::name.eq(name)))
+        .set(&models::UpdateMinion {
+            active: Some(false),
+            key: Some(None)
+        })
+        .execute(conn)
+        .expect(&format!("Could not revoke {}", name));
+}
+
 fn main() {
     let matches = cli::get_app(APP_NAME, VERSION).get_matches();
 
@@ -82,6 +94,15 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("delete") {
         let connection = pool.get().unwrap();
         delete_minion(&connection, matches.value_of("NAME").unwrap());
+    }
+
+    if let Some(matches) = matches.subcommand_matches("revoke") {
+        let connection = pool.get().unwrap();
+        revoke_minion(&connection, matches.value_of("NAME").unwrap());
+    }
+
+    if let Some(matches) = matches.subcommand_matches("regenerate") {
+        panic!("Not implemented");
     }
 
     if let Some(_) = matches.subcommand_matches("serve") {
