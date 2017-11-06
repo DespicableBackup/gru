@@ -1,5 +1,6 @@
 use std::ops::Deref;
 use db::Pool;
+use diesel;
 use diesel::prelude::*;
 use r2d2;
 use r2d2_diesel::ConnectionManager;
@@ -59,13 +60,25 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
 
 // Register a minion as active
 #[post("/register")]
-fn register(conn: DbConn, minion: Minion) -> String {
-    minion.name
+fn register(conn: DbConn, minion: Minion) -> &'static str {
+    use schema::minions::dsl;
+
+    diesel::update(&minion)
+        .set(dsl::active.eq(true))
+        .execute(&*conn)
+        .expect(&format!("Could not update {}", &minion.name));
+    "Public key"
 }
 
 // Set a minion as inactive
 #[post("/unregister")]
 fn unregister(conn: DbConn, minion: Minion) {
+    use schema::minions::dsl;
+
+    diesel::update(&minion)
+        .set(dsl::active.eq(false))
+        .execute(&*conn)
+        .expect(&format!("Could not update {}", &minion.name));
 }
 
 pub fn serve(pool: Pool) {
