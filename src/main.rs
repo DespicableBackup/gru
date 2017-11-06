@@ -71,7 +71,7 @@ fn list_minions(conn: &SqliteConnection) {
 fn revoke_minion(conn: &SqliteConnection, name: &str) {
     use schema::minions::dsl;
 
-    let minion = diesel::update(dsl::minions.filter(dsl::name.eq(name)))
+    diesel::update(dsl::minions.filter(dsl::name.eq(name)))
         .set(&models::UpdateMinion {
             active: Some(false),
             key: Some(None)
@@ -85,7 +85,7 @@ fn regen_minion(conn: &SqliteConnection, name: &str) {
 
     let key = generate_key();
 
-    let minion = diesel::update(dsl::minions.filter(dsl::name.eq(name)))
+    diesel::update(dsl::minions.filter(dsl::name.eq(name)))
         .set(&models::UpdateMinion {
             // Disable the minion as the key may have been compromised
             active: Some(false),
@@ -101,7 +101,7 @@ fn main() {
 
     let pool = db::connect();
 
-    if let Some(_) = matches.subcommand_matches("list") {
+    if matches.subcommand_matches("list").is_some() {
         let connection = pool.get().unwrap();
         list_minions(&connection);
     }
@@ -126,7 +126,7 @@ fn main() {
         regen_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
-    if let Some(_) = matches.subcommand_matches("serve") {
+    if matches.subcommand_matches("serve").is_some() {
         server::serve(pool);
     }
 }
