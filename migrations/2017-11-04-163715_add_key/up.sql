@@ -1,1 +1,0 @@
-ALTER TABLE minions ADD key VARCHAR;

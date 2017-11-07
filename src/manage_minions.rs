@@ -45,7 +45,8 @@ pub fn list_minions(conn: &SqliteConnection) {
     let results :Vec<models::Minion> = minions.load(conn).expect("Could not retrieve minions");
 
     for minion in results {
-        println!("{}", minion.name);
+        // TODO: get rid of allocation
+        println!("{}\t{}\t{}", minion.name, minion.active, minion.ip.unwrap_or("-".to_owned()));
     }
 }
 
@@ -55,7 +56,8 @@ pub fn revoke_minion(conn: &SqliteConnection, name: &str) {
     diesel::update(dsl::minions.filter(dsl::name.eq(name)))
         .set(&models::UpdateMinion {
             active: Some(false),
-            key: Some(None)
+            key: Some(None),
+            ip: Some(None),
         })
         .execute(conn)
         .expect(&format!("Could not revoke {}", name));
@@ -70,7 +72,8 @@ pub fn regen_minion(conn: &SqliteConnection, name: &str) {
         .set(&models::UpdateMinion {
             // Disable the minion as the key may have been compromised
             active: Some(false),
-            key: Some(Some(&key))
+            key: Some(Some(&key)),
+            ip: Some(None),
         })
         .execute(conn)
         .expect(&format!("Could not revoke {}", name));

@@ -1,4 +1,5 @@
 use std::ops::Deref;
+use std::net::IpAddr;
 use db::Pool;
 use diesel;
 use diesel::prelude::*;
@@ -13,14 +14,27 @@ use models::Minion;
 const API_KEY_HEADER: &str = "X-API-KEY";
 
 struct DbConn(r2d2::PooledConnection<ConnectionManager<SqliteConnection>>);
+struct Ip(IpAddr);
 
 impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
     type Error = ();
 
-    fn from_request(request: &'a Request<'r>) -> request::Outcome<DbConn, ()> { let pool = request.guard::<State<Pool>>()?;
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<DbConn, ()> {
+        let pool = request.guard::<State<Pool>>()?;
         match pool.get() {
             Ok(conn) => Outcome::Success(DbConn(conn)),
             Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
+        }
+    }
+}
+
+impl<'a, 'r> FromRequest<'a, 'r> for Ip {
+    type Error = ();
+
+    fn from_request(request: &'a Request<'r>) -> request::Outcome<Ip, ()> {
+        match request.remote() {
+            Some(addr) => Outcome::Success(Ip(addr.ip())),
+            None => Outcome::Failure((Status::BadRequest, ()))
         }
     }
 }
@@ -60,11 +74,14 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
 
 // Register a minion as active
 #[post("/register")]
-fn register(conn: DbConn, minion: Minion) -> &'static str {
+fn register(conn: DbConn, minion: Minion, ip: Ip) -> &'static str {
     use schema::minions::dsl;
 
     diesel::update(&minion)
-        .set(dsl::active.eq(true))
+        .set((
+                dsl::active.eq(true),
+                dsl::ip.eq(format!("{}", ip.0))
+             ))
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
     "Public key"
@@ -76,7 +93,10 @@ fn unregister(conn: DbConn, minion: Minion) {
     use schema::minions::dsl;
 
     diesel::update(&minion)
-        .set(dsl::active.eq(false))
+        .set((
+                dsl::active.eq(false),
+                dsl::ip.eq("")
+             ))
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
 }
