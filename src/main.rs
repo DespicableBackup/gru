@@ -12,8 +12,10 @@ extern crate clap;
 extern crate rand;
 extern crate base64;
 extern crate rocket;
+extern crate rocket_contrib;
 extern crate r2d2;
 extern crate r2d2_diesel;
+#[macro_use] extern crate serde_derive;
 
 mod db;
 mod cli;
