@@ -3,6 +3,8 @@ CREATE TABLE minions (
   name VARCHAR NOT NULL,
   active BOOLEAN NOT NULL DEFAULT false,
   key VARCHAR,
-  ip VARCHAR
+  ip VARCHAR,
+  username VARCHAR,
+  port INTEGER DEFAULT 22
 );
 CREATE UNIQUE INDEX minions_unique ON minions(name);

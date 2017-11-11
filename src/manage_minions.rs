@@ -46,7 +46,14 @@ pub fn list_minions(conn: &SqliteConnection) {
 
     for minion in results {
         // TODO: get rid of allocation
-        println!("{}\t{}\t{}", minion.name, minion.active, minion.ip.unwrap_or("-".to_owned()));
+        println!(
+            "{}\t{}\t{}@{}:{}",
+            minion.name,
+            minion.active,
+            minion.username.unwrap_or("-".to_owned()),
+            minion.ip.unwrap_or("-".to_owned()),
+            minion.port.unwrap_or(22)
+            );
     }
 }
 
@@ -58,6 +65,8 @@ pub fn revoke_minion(conn: &SqliteConnection, name: &str) {
             active: Some(false),
             key: Some(None),
             ip: Some(None),
+            username: Some(None),
+            port: Some(Some(22)),
         })
         .execute(conn)
         .expect(&format!("Could not revoke {}", name));
@@ -74,6 +83,8 @@ pub fn regen_minion(conn: &SqliteConnection, name: &str) {
             active: Some(false),
             key: Some(Some(&key)),
             ip: Some(None),
+            username: Some(None),
+            port: Some(Some(22)),
         })
         .execute(conn)
         .expect(&format!("Could not revoke {}", name));

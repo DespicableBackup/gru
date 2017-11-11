@@ -77,6 +77,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
 fn register(conn: DbConn, minion: Minion, ip: Ip) -> &'static str {
     use schema::minions::dsl;
 
+    // TODO: get username and port from request data
     diesel::update(&minion)
         .set((
                 dsl::active.eq(true),
