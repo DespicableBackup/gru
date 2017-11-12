@@ -38,7 +38,13 @@ fn main() {
     let pool = db::connect();
 
     let connection = pool.get().unwrap();
-    embedded_migrations::run(&*connection);
+    match embedded_migrations::run(&*connection) {
+        Ok(_) => {},
+        Err(_) => {
+            println!("Unable to run database migration");
+            return;
+        }
+    }
 
     if matches.subcommand_matches("list").is_some() {
         manage_minions::list_minions(&connection);
