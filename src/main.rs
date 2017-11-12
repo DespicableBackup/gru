@@ -27,6 +27,8 @@ mod manage_minions;
 use std::fs::File;
 use std::io::Read;
 
+embed_migrations!();
+
 const APP_NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -35,28 +37,26 @@ fn main() {
 
     let pool = db::connect();
 
+    let connection = pool.get().unwrap();
+    embedded_migrations::run(&*connection);
+
     if matches.subcommand_matches("list").is_some() {
-        let connection = pool.get().unwrap();
         manage_minions::list_minions(&connection);
     }
 
     if let Some(matches) = matches.subcommand_matches("create") {
-        let connection = pool.get().unwrap();
         manage_minions::create_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
     if let Some(matches) = matches.subcommand_matches("delete") {
-        let connection = pool.get().unwrap();
         manage_minions::delete_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
     if let Some(matches) = matches.subcommand_matches("revoke") {
-        let connection = pool.get().unwrap();
         manage_minions::revoke_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
     if let Some(matches) = matches.subcommand_matches("regenerate") {
-        let connection = pool.get().unwrap();
         manage_minions::regen_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
