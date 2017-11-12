@@ -16,6 +16,7 @@ const API_KEY_HEADER: &str = "X-API-KEY";
 
 struct DbConn(r2d2::PooledConnection<ConnectionManager<SqliteConnection>>);
 struct Ip(IpAddr);
+struct Pubkey(String);
 
 #[derive(Deserialize)]
 struct Registration {
@@ -81,7 +82,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
 
 // Register a minion as active
 #[post("/register", data="<input>")]
-fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>) -> &'static str {
+fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, pubkey: State<Pubkey>) -> String {
     use schema::minions::dsl;
 
     diesel::update(&minion)
@@ -93,7 +94,8 @@ fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>) -> 
              ))
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
-    "Public key"
+    // TODO: avoid clone
+    pubkey.0.clone()
 }
 
 // Set a minion as inactive
@@ -110,9 +112,10 @@ fn unregister(conn: DbConn, minion: Minion) {
         .expect(&format!("Could not update {}", &minion.name));
 }
 
-pub fn serve(pool: Pool) {
+pub fn serve(pool: Pool, pubkey: String) {
     rocket::ignite()
         .mount("/", routes![register, unregister])
         .manage(pool)
+        .manage(Pubkey(pubkey))
         .launch();
 }

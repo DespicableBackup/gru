@@ -24,6 +24,9 @@ mod schema;
 mod server;
 mod manage_minions;
 
+use std::fs::File;
+use std::io::Read;
+
 const APP_NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -57,7 +60,10 @@ fn main() {
         manage_minions::regen_minion(&connection, matches.value_of("NAME").unwrap());
     }
 
-    if matches.subcommand_matches("serve").is_some() {
-        server::serve(pool);
+    if let Some(matches) = matches.subcommand_matches("serve") {
+        let mut file = File::open(matches.value_of("PUBKEY").unwrap()).expect("load public key");
+        let mut pubkey = String::new();
+        file.read_to_string(&mut pubkey).expect("read public key");
+        server::serve(pool, pubkey);
     }
 }
