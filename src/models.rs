@@ -7,8 +7,9 @@ pub struct Minion {
     pub active: bool,
     pub key: Option<String>,
     pub ip: Option<String>,
-    pub username: Option<String>,
     pub port: Option<i32>,
+    pub username: Option<String>,
+    pub directory: Option<String>,
 }
 
 #[derive(AsChangeset)]
@@ -17,8 +18,9 @@ pub struct UpdateMinion<'a> {
     pub active: Option<bool>,
     pub key: Option<Option<&'a str>>,
     pub ip: Option<Option<&'a str>>,
-    pub username: Option<Option<&'a str>>,
     pub port: Option<Option<i32>>,
+    pub username: Option<Option<&'a str>>,
+    pub directory: Option<Option<&'a str>>,
 }
 
 #[derive(Insertable)]

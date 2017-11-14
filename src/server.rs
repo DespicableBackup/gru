@@ -22,6 +22,7 @@ struct Pubkey(String);
 struct Registration {
     username: String,
     port: i32,
+    directory: String,
 }
 
 impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
@@ -91,6 +92,7 @@ fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, pub
                 dsl::ip.eq(format!("{}", ip.0)),
                 dsl::username.eq(&input.username),
                 dsl::port.eq(&input.port),
+                dsl::directory.eq(&input.directory),
              ))
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
