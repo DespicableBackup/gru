@@ -14,13 +14,18 @@ use models::Minion;
 
 const API_KEY_HEADER: &str = "X-API-KEY";
 
+/// Database request guard
 struct DbConn(r2d2::PooledConnection<ConnectionManager<SqliteConnection>>);
+/// Client IP request guard
 struct Ip(IpAddr);
+/// Public key managed state
 struct Pubkey(String);
 
+/// Expected data for a minion's registration
 #[derive(Deserialize)]
 struct Registration {
     username: String,
+    // TODO: how to handle both string and integer?
     port: i32,
     directory: String,
 }
@@ -48,6 +53,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Ip {
     }
 }
 
+/// Convenience Deref implementation to use DbConn as a SqliteConnection
 impl Deref for DbConn {
     type Target = SqliteConnection;
 
