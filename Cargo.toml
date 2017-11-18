@@ -15,13 +15,13 @@ assets = [
 [dependencies]
 base64 = "^0.7.0"
 clap = "^2.27.1"
-dotenv = "^0.10.1"
 r2d2 = "^0.7.4"
 r2d2-diesel = "^0.16.0"
 rand = "^0.3.17"
 rocket = "^0.3.3"
 rocket_codegen = "^0.3.3"
 rocket_contrib = "^0.3.3"
+rust-ini = "^0.10.0"
 serde = "^1.0.19"
 serde_derive = "^1.0.19"
 
