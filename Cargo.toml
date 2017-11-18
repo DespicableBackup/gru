@@ -11,6 +11,7 @@ priority = "optional"
 assets = [
     ["target/release/gru", "usr/local/bin/", "755"],
     ["resources/gru.service", "usr/lib/systemd/system/", "644"],
+    ["resources/conf/gru", "etc/default/", "644"],
 ]
 [dependencies]
 base64 = "^0.7.0"

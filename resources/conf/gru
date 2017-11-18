@@ -1,0 +1,2 @@
+[database]
+path=/var/lib/gru/data.sqlite
