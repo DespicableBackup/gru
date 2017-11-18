@@ -1,0 +1,7 @@
+[Unit]
+Description=Gru
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/gru serve

@@ -2,6 +2,16 @@
 authors = ["Greizgh <greizgh@ephax.org>"]
 name = "gru"
 version = "0.1.0"
+license = "MIT"
+[package.metadata.deb]
+license-file = ["COPYING"]
+depends = "$auto, systemd"
+section = "admin"
+priority = "optional"
+assets = [
+    ["target/release/gru", "usr/local/bin/", "755"],
+    ["resources/gru.service", "usr/lib/systemd/system/", "644"],
+]
 [dependencies]
 base64 = "^0.7.0"
 clap = "^2.27.1"
