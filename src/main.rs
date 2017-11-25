@@ -40,6 +40,7 @@ fn main() {
     let conf = Ini::load_from_file(CONFIG_PATH).expect("Could not load config file");
 
     let db_section = conf.section(Some("database")).unwrap();
+    let ssh_section = conf.section(Some("ssh")).unwrap();
 
     let pool = db::connect(db_section.get("path").unwrap());
 
@@ -50,6 +51,13 @@ fn main() {
             println!("Unable to run database migration");
             return;
         }
+    }
+
+    if matches.subcommand_matches("serve").is_some() {
+        let mut file = File::open(ssh_section.get("public-key").unwrap()).expect("load public key");
+        let mut pubkey = String::new();
+        file.read_to_string(&mut pubkey).expect("read public key");
+        server::serve(pool, pubkey);
     }
 
     if matches.subcommand_matches("list").is_some() {
@@ -70,12 +78,5 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("regenerate") {
         manage_minions::regen_minion(&connection, matches.value_of("NAME").unwrap());
-    }
-
-    if let Some(matches) = matches.subcommand_matches("serve") {
-        let mut file = File::open(matches.value_of("PUBKEY").unwrap()).expect("load public key");
-        let mut pubkey = String::new();
-        file.read_to_string(&mut pubkey).expect("read public key");
-        server::serve(pool, pubkey);
     }
 }
