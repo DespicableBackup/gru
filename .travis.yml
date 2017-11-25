@@ -3,3 +3,4 @@ rust:
   - nightly
 env:
   - GRU_CONFIG_PATH=/dev/null
+cache: cargo
