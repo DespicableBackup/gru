@@ -3,6 +3,8 @@ authors = ["Greizgh <greizgh@ephax.org>"]
 name = "gru"
 version = "0.1.0"
 license = "MIT"
+readme = "README.md"
+description = "Server handling minions, helping self hosters to distribute their backups"
 [package.metadata.deb]
 license-file = ["COPYING"]
 depends = "$auto, systemd"
@@ -13,6 +15,7 @@ assets = [
     ["resources/gru.service", "usr/lib/systemd/system/", "644"],
     ["resources/conf/gru", "etc/default/", "644"],
 ]
+maintainer-scripts = "resources/debian"
 [dependencies]
 base64 = "^0.7.0"
 clap = "^2.27.1"

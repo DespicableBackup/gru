@@ -4,4 +4,5 @@ After=network.target
 
 [Service]
 Type=simple
+User=_gru
 ExecStart=/usr/bin/gru serve
