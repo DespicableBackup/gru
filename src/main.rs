@@ -45,38 +45,31 @@ fn main() {
     let pool = db::connect(db_section.get("path").unwrap());
 
     let connection = pool.get().unwrap();
-    match embedded_migrations::run(&*connection) {
-        Ok(_) => {},
-        Err(_) => {
-            println!("Unable to run database migration");
-            return;
-        }
+    if embedded_migrations::run(&*connection).is_err() {
+        println!("Unable to run database migration");
+        return;
     }
 
-    if matches.subcommand_matches("serve").is_some() {
-        let mut file = File::open(ssh_section.get("public-key").unwrap()).expect("load public key");
-        let mut pubkey = String::new();
-        file.read_to_string(&mut pubkey).expect("read public key");
-        server::serve(pool, pubkey);
-    }
-
-    if matches.subcommand_matches("list").is_some() {
-        manage_minions::list_minions(&connection);
-    }
-
-    if let Some(matches) = matches.subcommand_matches("create") {
-        manage_minions::create_minion(&connection, matches.value_of("NAME").unwrap());
-    }
-
-    if let Some(matches) = matches.subcommand_matches("delete") {
-        manage_minions::delete_minion(&connection, matches.value_of("NAME").unwrap());
-    }
-
-    if let Some(matches) = matches.subcommand_matches("revoke") {
-        manage_minions::revoke_minion(&connection, matches.value_of("NAME").unwrap());
-    }
-
-    if let Some(matches) = matches.subcommand_matches("regenerate") {
-        manage_minions::regen_minion(&connection, matches.value_of("NAME").unwrap());
+    match matches.subcommand() {
+        ("serve", _) => {
+            let mut file = File::open(ssh_section.get("public-key").unwrap()).expect("load public key");
+            let mut pubkey = String::new();
+            file.read_to_string(&mut pubkey).expect("read public key");
+            server::serve(pool, pubkey);
+        },
+        ("list", _) => manage_minions::list_minions(&connection),
+        ("create", Some(args)) => {
+            manage_minions::create_minion(&connection, args.value_of("NAME").unwrap());
+        },
+        ("delete", Some(args)) => {
+            manage_minions::delete_minion(&connection, args.value_of("NAME").unwrap());
+        },
+        ("revoke", Some(args)) => {
+            manage_minions::revoke_minion(&connection, args.value_of("NAME").unwrap());
+        },
+        ("regenerate", Some(args)) => {
+            manage_minions::regen_minion(&connection, args.value_of("NAME").unwrap());
+        },
+        (_, _) => unimplemented!(),
     }
 }
