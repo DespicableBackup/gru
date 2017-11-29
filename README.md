@@ -77,12 +77,14 @@ The easiest way to achieve this is to enable the systemd unit:
 Building Gru requires rust nightly, the easiest way to get up and running is via [rustup](https://www.rustup.rs/).
 Then simply run:
 
-    GRU_CONFIG_PATH=/etc/default/gru cargo build --release
+    cargo build --release
+
+*Note to maintainers*: you can specify configuration path at build time through the "GRU_CONFIG_PATH" environment variable.
 
 ### Package for debian
 
     cargo install cargo-deb
-    GRU_CONFIG_PATH=/etc/default/gru cargo deb
+    cargo deb
 
 ## License
 
