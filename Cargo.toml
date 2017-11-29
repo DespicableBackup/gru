@@ -1,27 +1,26 @@
 [package]
 authors = ["Greizgh <greizgh@ephax.org>"]
-name = "gru"
-version = "0.1.0"
-license = "MIT"
-readme = "README.md"
-description = "Server handling minions, helping self hosters to distribute their backups"
 build = "build.rs"
-[package.metadata.deb]
-license-file = ["COPYING"]
+description = "Server handling minions, helping self hosters to distribute their backups"
+license = "MIT"
+name = "gru"
+readme = "README.md"
+version = "0.1.0"
+
+[metadata.deb]
+assets = [["target/release/gru", "usr/local/bin/", "755"], ["resources/gru.service", "usr/lib/systemd/system/", "644"], ["resources/conf/server.conf", "etc/gru/server.conf", "644"]]
 depends = "$auto, systemd"
-section = "admin"
-priority = "optional"
-assets = [
-    ["target/release/gru", "usr/local/bin/", "755"],
-    ["resources/gru.service", "usr/lib/systemd/system/", "644"],
-    ["resources/conf/server.conf", "etc/gru/server.conf", "644"],
-]
+license-file = ["COPYING"]
 maintainer-scripts = "resources/debian"
+priority = "optional"
+section = "admin"
+
 [dependencies]
 base64 = "^0.7.0"
 clap = "^2.27.1"
-r2d2 = "^0.7.4"
-r2d2-diesel = "^0.16.0"
+diesel_migrations = "^0.99.0"
+r2d2 = "^0.8.1"
+r2d2-diesel = "^0.99.0"
 rand = "^0.3.17"
 rocket = "^0.3.3"
 rocket_codegen = "^0.3.3"
@@ -32,8 +31,4 @@ serde_derive = "^1.0.19"
 
 [dependencies.diesel]
 features = ["sqlite"]
-version = "^0.16.0"
-
-[dependencies.diesel_codegen]
-features = ["sqlite"]
-version = "^0.16.0"
+version = "^0.99.0"

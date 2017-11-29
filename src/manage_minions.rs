@@ -24,8 +24,8 @@ pub fn create_minion(conn: &SqliteConnection, name: &str) {
         key: &key,
     };
 
-    diesel::insert(&minion)
-        .into(minions::table)
+    diesel::insert_into(minions::table)
+        .values(&minion)
         .execute(conn)
         .expect("Error saving new minion");
 

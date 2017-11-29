@@ -1,12 +1,8 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-// Allow to use infer_schema macro
-// See https://github.com/diesel-rs/diesel/issues/1127
-#![recursion_limit="128"]
-
 #[macro_use] extern crate diesel;
-#[macro_use] extern crate diesel_codegen;
+#[macro_use] extern crate diesel_migrations;
 extern crate clap;
 extern crate rand;
 extern crate base64;
