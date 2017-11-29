@@ -52,9 +52,13 @@ fn main() {
 
     match matches.subcommand() {
         ("serve", _) => {
-            let mut file = File::open(ssh_section.get("public-key").unwrap()).expect("load public key");
             let mut pubkey = String::new();
-            file.read_to_string(&mut pubkey).expect("read public key");
+            if let Some(key) = ssh_section.get("pubkey") {
+                pubkey = key.to_owned();
+            } else {
+                let mut file = File::open(ssh_section.get("pubkey-path").unwrap()).expect("load public key");
+                file.read_to_string(&mut pubkey).expect("read public key");
+            }
             server::serve(pool, pubkey);
         },
         ("list", _) => manage_minions::list_minions(&connection),
