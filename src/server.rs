@@ -11,6 +11,7 @@ use rocket::http::Status;
 use rocket::request::{self, FromRequest};
 use rocket::{Request, State, Outcome};
 use models::Minion;
+use config::Config;
 
 const API_KEY_HEADER: &str = "X-API-KEY";
 
@@ -103,7 +104,7 @@ fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, pub
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
     // TODO: avoid clone
-    pubkey.0.clone()
+    pubkey.0.to_owned()
 }
 
 // Set a minion as inactive
@@ -120,10 +121,11 @@ fn unregister(conn: DbConn, minion: Minion) {
         .expect(&format!("Could not update {}", &minion.name));
 }
 
-pub fn serve(pool: Pool, pubkey: String) {
+pub fn serve(pool: Pool, config: &Config) {
     rocket::ignite()
         .mount("/", routes![register, unregister])
         .manage(pool)
-        .manage(Pubkey(pubkey))
+        // TODO: avoid cloning
+        .manage(Pubkey(config.pubkey.clone()))
         .launch();
 }

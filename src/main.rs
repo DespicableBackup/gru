@@ -19,10 +19,7 @@ mod models;
 mod schema;
 mod server;
 mod manage_minions;
-
-use std::fs::File;
-use std::io::Read;
-use ini::Ini;
+mod config;
 
 embed_migrations!();
 
@@ -33,12 +30,9 @@ const CONFIG_PATH: &str = env!("GRU_CONFIG_PATH");
 fn main() {
     let matches = cli::get_app(APP_NAME, VERSION).get_matches();
 
-    let conf = Ini::load_from_file(CONFIG_PATH).expect("Could not load config file");
+    let conf = config::Config::from_file(CONFIG_PATH).expect("loading config file");
 
-    let db_section = conf.section(Some("database")).unwrap();
-    let ssh_section = conf.section(Some("ssh")).unwrap();
-
-    let pool = db::connect(db_section.get("path").unwrap());
+    let pool = db::connect(&conf.db_path);
 
     let connection = pool.get().unwrap();
     if embedded_migrations::run(&*connection).is_err() {
@@ -48,14 +42,7 @@ fn main() {
 
     match matches.subcommand() {
         ("serve", _) => {
-            let mut pubkey = String::new();
-            if let Some(key) = ssh_section.get("pubkey") {
-                pubkey = key.to_owned();
-            } else {
-                let mut file = File::open(ssh_section.get("pubkey-path").unwrap()).expect("load public key");
-                file.read_to_string(&mut pubkey).expect("read public key");
-            }
-            server::serve(pool, pubkey);
+            server::serve(pool, &conf);
         },
         ("list", _) => manage_minions::list_minions(&connection),
         ("create", Some(args)) => {
