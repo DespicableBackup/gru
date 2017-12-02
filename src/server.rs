@@ -19,8 +19,6 @@ const API_KEY_HEADER: &str = "X-API-KEY";
 struct DbConn(r2d2::PooledConnection<ConnectionManager<SqliteConnection>>);
 /// Client IP request guard
 struct Ip(IpAddr);
-/// Public key managed state
-struct Pubkey(String);
 
 /// Expected data for a minion's registration
 #[derive(Deserialize)]
@@ -90,7 +88,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
 
 // Register a minion as active
 #[post("/register", data="<input>")]
-fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, pubkey: State<Pubkey>) -> String {
+fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, config: State<Config>) -> String {
     use schema::minions::dsl;
 
     diesel::update(&minion)
@@ -103,8 +101,7 @@ fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, pub
              ))
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
-    // TODO: avoid clone
-    pubkey.0.to_owned()
+    config.pubkey.clone()
 }
 
 // Set a minion as inactive
@@ -121,11 +118,10 @@ fn unregister(conn: DbConn, minion: Minion) {
         .expect(&format!("Could not update {}", &minion.name));
 }
 
-pub fn serve(pool: Pool, config: &Config) {
+pub fn serve(pool: Pool, config: Config) {
     rocket::ignite()
         .mount("/", routes![register, unregister])
         .manage(pool)
-        // TODO: avoid cloning
-        .manage(Pubkey(config.pubkey.clone()))
+        .manage(config)
         .launch();
 }

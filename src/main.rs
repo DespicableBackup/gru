@@ -54,7 +54,7 @@ fn main() {
 
     match matches.subcommand() {
         ("serve", _) => {
-            server::serve(pool, &conf);
+            server::serve(pool, conf);
         },
         ("list", _) => manage_minions::list_minions(&connection),
         ("create", Some(args)) => {
