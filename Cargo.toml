@@ -27,7 +27,7 @@ serde_derive = "^1.0.19"
 features = ["sqlite"]
 version = "^0.99.0"
 
-[metadata.deb]
+[package.metadata.deb]
 assets = [
     ["target/release/gru", "usr/local/bin/", "755"],
     ["resources/gru.service", "usr/lib/systemd/system/", "644"],

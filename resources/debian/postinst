@@ -1,2 +1,2 @@
 #!/bin/sh
-adduser --system _gru --home /var/lib/gru
+adduser --system --home /var/lib/gru gru
