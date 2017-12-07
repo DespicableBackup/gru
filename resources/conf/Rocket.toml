@@ -1,0 +1,7 @@
+# Gru is using Rocket server framework
+# Adapt this configuration to your needs
+# More info at https://rocket.rs/guide/configuration/#rockettoml
+[production]
+# Port chosen completely randomly
+port = 7331
+secret_key = "GENERATE_KEY"

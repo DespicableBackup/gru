@@ -1,2 +1,5 @@
 #!/bin/sh
 adduser --system --home /var/lib/gru gru
+
+key=`cat /dev/urandom | fold -b32 | head -n1 | base64`
+sed -i "s#GENERATE_KEY#${key}#" /etc/gru/Rocket.toml

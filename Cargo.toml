@@ -31,7 +31,8 @@ version = "^0.99.0"
 assets = [
     ["target/release/gru", "usr/local/bin/", "755"],
     ["resources/gru.service", "usr/lib/systemd/system/", "644"],
-    ["resources/conf/server.conf", "etc/gru/server.conf", "644"],
+    ["resources/conf/gru.conf", "etc/gru/gru.conf", "644"],
+    ["resources/conf/Rocket.toml", "etc/gru/Rocket.toml", "644"],
 ]
 depends = "$auto, systemd"
 license-file = ["COPYING"]

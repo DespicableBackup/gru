@@ -23,7 +23,7 @@ pubkey=testpubkey").unwrap();
             println!("cargo:rustc-env=GRU_CONFIG_PATH=./dev.conf");
         } else {
             // Release conf
-            println!("cargo:rustc-env=GRU_CONFIG_PATH=/etc/gru/server.conf");
+            println!("cargo:rustc-env=GRU_CONFIG_PATH=/etc/gru/gru.conf");
         }
     }
 }
