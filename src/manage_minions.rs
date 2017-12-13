@@ -2,6 +2,7 @@ use diesel;
 use diesel::prelude::*;
 use rand::{OsRng, Rng};
 use base64::encode;
+use failure::Error;
 use models;
 
 const KEY_LENGTH: usize = 64;
@@ -14,7 +15,7 @@ pub fn generate_key() -> String {
     encode(&buf)
 }
 
-pub fn create_minion(conn: &SqliteConnection, name: &str) {
+pub fn create_minion(conn: &SqliteConnection, name: &str) -> Result<(), Error> {
     use schema::minions;
 
     let key = generate_key();
@@ -26,23 +27,23 @@ pub fn create_minion(conn: &SqliteConnection, name: &str) {
 
     diesel::insert_into(minions::table)
         .values(&minion)
-        .execute(conn)
-        .expect("Error saving new minion");
+        .execute(conn)?;
 
     println!("Minion API key: {}", key);
+    Ok(())
 }
 
-pub fn delete_minion(conn: &SqliteConnection, name: &str) {
+pub fn delete_minion(conn: &SqliteConnection, name: &str) -> Result<(), Error> {
     use schema::minions::dsl;
 
     diesel::delete(dsl::minions.filter(dsl::name.eq(name)))
-        .execute(conn)
-        .expect("Error deleting minion");
+        .execute(conn)?;
+    Ok(())
 }
 
-pub fn list_minions(conn: &SqliteConnection) {
+pub fn list_minions(conn: &SqliteConnection) -> Result<(), Error> {
     use schema::minions::dsl::*;
-    let results :Vec<models::Minion> = minions.load(conn).expect("Could not retrieve minions");
+    let results :Vec<models::Minion> = minions.load(conn)?;
 
     for minion in results {
         // TODO: get rid of allocation
@@ -55,9 +56,10 @@ pub fn list_minions(conn: &SqliteConnection) {
             minion.port.unwrap_or(22)
             );
     }
+    Ok(())
 }
 
-pub fn revoke_minion(conn: &SqliteConnection, name: &str) {
+pub fn revoke_minion(conn: &SqliteConnection, name: &str) -> Result<(), Error> {
     use schema::minions::dsl;
 
     diesel::update(dsl::minions.filter(dsl::name.eq(name)))
@@ -69,11 +71,11 @@ pub fn revoke_minion(conn: &SqliteConnection, name: &str) {
             username: Some(None),
             directory: Some(None),
         })
-        .execute(conn)
-        .expect(&format!("Could not revoke {}", name));
+        .execute(conn)?;
+    Ok(())
 }
 
-pub fn regen_minion(conn: &SqliteConnection, name: &str) {
+pub fn regen_minion(conn: &SqliteConnection, name: &str) -> Result<(), Error> {
     use schema::minions::dsl;
 
     let key = generate_key();
@@ -88,9 +90,9 @@ pub fn regen_minion(conn: &SqliteConnection, name: &str) {
             username: Some(None),
             directory: Some(None),
         })
-        .execute(conn)
-        .expect(&format!("Could not revoke {}", name));
+        .execute(conn)?;
     println!("New key: {}", key);
+    Ok(())
 }
 
 #[cfg(test)]
