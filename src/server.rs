@@ -87,7 +87,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
 }
 
 // Register a minion as active
-#[post("/register", data="<input>")]
+#[post("/minion", data="<input>")]
 fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, config: State<Config>) -> String {
     use schema::minions::dsl;
 
@@ -105,7 +105,7 @@ fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, con
 }
 
 // Set a minion as inactive
-#[post("/unregister")]
+#[delete("/minion")]
 fn unregister(conn: DbConn, minion: Minion) {
     use schema::minions::dsl;
 
