@@ -9,7 +9,7 @@ use rocket;
 use rocket_contrib::Json;
 use rocket::http::Status;
 use rocket::request::{self, FromRequest};
-use rocket::{Request, State, Outcome};
+use rocket::{Outcome, Request, State};
 use models::Minion;
 use config::Config;
 
@@ -36,7 +36,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for DbConn {
         let pool = request.guard::<State<Pool>>()?;
         match pool.get() {
             Ok(conn) => Outcome::Success(DbConn(conn)),
-            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
+            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ())),
         }
     }
 }
@@ -47,7 +47,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Ip {
     fn from_request(request: &'a Request<'r>) -> request::Outcome<Ip, ()> {
         match request.remote() {
             Some(addr) => Outcome::Success(Ip(addr.ip())),
-            None => Outcome::Failure((Status::BadRequest, ()))
+            None => Outcome::Failure((Status::BadRequest, ())),
         }
     }
 }
@@ -78,7 +78,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
         if let Ok(conn) = pool.get() {
             match dsl::minions.filter(dsl::key.eq(key)).first(&*conn) {
                 Ok(minion) => Outcome::Success(minion),
-                Err(_) => Outcome::Failure((Status::Forbidden, ()))
+                Err(_) => Outcome::Failure((Status::Forbidden, ())),
             }
         } else {
             Outcome::Failure((Status::ServiceUnavailable, ()))
@@ -87,18 +87,24 @@ impl<'a, 'r> FromRequest<'a, 'r> for Minion {
 }
 
 // Register a minion as active
-#[post("/minion", data="<input>")]
-fn register(conn: DbConn, minion: Minion, ip: Ip, input: Json<Registration>, config: State<Config>) -> String {
+#[post("/minion", data = "<input>")]
+fn register(
+    conn: DbConn,
+    minion: Minion,
+    ip: Ip,
+    input: Json<Registration>,
+    config: State<Config>,
+) -> String {
     use schema::minions::dsl;
 
     diesel::update(&minion)
         .set((
-                dsl::active.eq(true),
-                dsl::ip.eq(format!("{}", ip.0)),
-                dsl::username.eq(&input.username),
-                dsl::port.eq(&input.port),
-                dsl::directory.eq(&input.directory),
-             ))
+            dsl::active.eq(true),
+            dsl::ip.eq(format!("{}", ip.0)),
+            dsl::username.eq(&input.username),
+            dsl::port.eq(&input.port),
+            dsl::directory.eq(&input.directory),
+        ))
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
     config.pubkey.clone()
@@ -110,10 +116,7 @@ fn unregister(conn: DbConn, minion: Minion) {
     use schema::minions::dsl;
 
     diesel::update(&minion)
-        .set((
-                dsl::active.eq(false),
-                dsl::ip.eq("")
-             ))
+        .set((dsl::active.eq(false), dsl::ip.eq("")))
         .execute(&*conn)
         .expect(&format!("Could not update {}", &minion.name));
 }

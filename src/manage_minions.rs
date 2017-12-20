@@ -36,14 +36,13 @@ pub fn create_minion(conn: &SqliteConnection, name: &str) -> Result<(), Error> {
 pub fn delete_minion(conn: &SqliteConnection, name: &str) -> Result<(), Error> {
     use schema::minions::dsl;
 
-    diesel::delete(dsl::minions.filter(dsl::name.eq(name)))
-        .execute(conn)?;
+    diesel::delete(dsl::minions.filter(dsl::name.eq(name))).execute(conn)?;
     Ok(())
 }
 
 pub fn list_minions(conn: &SqliteConnection) -> Result<(), Error> {
     use schema::minions::dsl::*;
-    let results :Vec<models::Minion> = minions.load(conn)?;
+    let results: Vec<models::Minion> = minions.load(conn)?;
 
     for minion in results {
         // TODO: get rid of allocation
@@ -54,7 +53,7 @@ pub fn list_minions(conn: &SqliteConnection) -> Result<(), Error> {
             minion.username.unwrap_or_else(|| "-".to_owned()),
             minion.ip.unwrap_or_else(|| "-".to_owned()),
             minion.port.unwrap_or(22)
-            );
+        );
     }
     Ok(())
 }
@@ -103,8 +102,8 @@ mod tests {
     fn it_generate_key() {
         let key = generate_key();
         // base64 encoding handle 6 bytes per character
-        let expected_length = ( KEY_LENGTH % 6 + KEY_LENGTH) / 6 * 8 ;
-        println!("expected_length: {}", KEY_LENGTH/6);
+        let expected_length = (KEY_LENGTH % 6 + KEY_LENGTH) / 6 * 8;
+        println!("expected_length: {}", KEY_LENGTH / 6);
         assert!(key.capacity() == expected_length);
     }
 }

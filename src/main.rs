@@ -1,19 +1,23 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-#[macro_use] extern crate diesel;
-#[macro_use] extern crate diesel_migrations;
-extern crate clap;
-extern crate rand;
 extern crate base64;
-extern crate rocket;
-extern crate rocket_contrib;
+extern crate clap;
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
+extern crate failure;
+#[macro_use]
+extern crate failure_derive;
+extern crate ini;
 extern crate r2d2;
 extern crate r2d2_diesel;
-extern crate ini;
-#[macro_use] extern crate serde_derive;
-extern crate failure;
-#[macro_use] extern crate failure_derive;
+extern crate rand;
+extern crate rocket;
+extern crate rocket_contrib;
+#[macro_use]
+extern crate serde_derive;
 
 mod db;
 mod cli;
@@ -34,7 +38,7 @@ const CONFIG_PATH: &str = env!("GRU_CONFIG_PATH");
 
 fn main() {
     match run() {
-        Ok(_) => {},
+        Ok(_) => {}
         Err(e) => {
             eprintln!("{}", e);
         }
@@ -55,20 +59,20 @@ fn run() -> Result<(), Error> {
         ("serve", _) => {
             server::serve(pool, conf);
             Ok(())
-        },
+        }
         ("list", _) => manage_minions::list_minions(&connection),
         ("create", Some(args)) => {
             manage_minions::create_minion(&connection, args.value_of("NAME").unwrap())
-        },
+        }
         ("delete", Some(args)) => {
             manage_minions::delete_minion(&connection, args.value_of("NAME").unwrap())
-        },
+        }
         ("revoke", Some(args)) => {
             manage_minions::revoke_minion(&connection, args.value_of("NAME").unwrap())
-        },
+        }
         ("regenerate", Some(args)) => {
             manage_minions::regen_minion(&connection, args.value_of("NAME").unwrap())
-        },
+        }
         (_, _) => unimplemented!(),
     }
 }

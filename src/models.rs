@@ -13,7 +13,7 @@ pub struct Minion {
 }
 
 #[derive(AsChangeset)]
-#[table_name="minions"]
+#[table_name = "minions"]
 pub struct UpdateMinion<'a> {
     pub active: Option<bool>,
     pub key: Option<Option<&'a str>>,
@@ -24,7 +24,7 @@ pub struct UpdateMinion<'a> {
 }
 
 #[derive(Insertable)]
-#[table_name="minions"]
+#[table_name = "minions"]
 pub struct NewMinion<'a> {
     pub name: &'a str,
     pub key: &'a str,
