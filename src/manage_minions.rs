@@ -45,7 +45,6 @@ pub fn list_minions(conn: &SqliteConnection) -> Result<(), Error> {
     let results: Vec<models::Minion> = minions.load(conn)?;
 
     for minion in results {
-        // TODO: get rid of allocation
         println!(
             "{}\t{}\t{}@{}:{}",
             minion.name,

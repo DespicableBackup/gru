@@ -15,10 +15,12 @@ fn main() {
         if profile == "debug" || profile == "test" {
             if !Path::new("./dev.conf").exists() {
                 let mut f = File::create("./dev.conf").unwrap();
-                f.write_all(b"[database]
+                f.write_all(
+                    b"[database]
 path=test.db
 [ssh]
-pubkey=testpubkey").unwrap();
+pubkey=testpubkey",
+                ).unwrap();
             }
             println!("cargo:rustc-env=GRU_CONFIG_PATH=./dev.conf");
         } else {
