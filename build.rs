@@ -17,9 +17,9 @@ fn main() {
                 let mut f = File::create("./dev.conf").unwrap();
                 f.write_all(
                     b"[database]
-path=test.db
+path=\"test.db\"
 [ssh]
-pubkey=testpubkey",
+pubkey=\"testpubkey\"",
                 ).unwrap();
             }
             println!("cargo:rustc-env=GRU_CONFIG_PATH=./dev.conf");

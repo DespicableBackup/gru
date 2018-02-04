@@ -10,7 +10,6 @@ extern crate diesel_migrations;
 extern crate failure;
 #[macro_use]
 extern crate failure_derive;
-extern crate ini;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate rand;
@@ -18,6 +17,7 @@ extern crate rocket;
 extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
+extern crate toml;
 
 mod db;
 mod cli;

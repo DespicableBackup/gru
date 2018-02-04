@@ -1,11 +1,31 @@
-use ini::Ini;
+use toml;
 use std::fs::File;
 use std::io::Read;
+use failure::Error;
 
 #[derive(Fail, Debug)]
 #[fail(display = "Invalid configuration: {}", message)]
 pub struct ConfigError {
     message: String,
+}
+
+/// Config file to be deserialized
+#[derive(Deserialize)]
+struct ConfigValues {
+    database: DbConfig,
+    ssh: SshConfig,
+}
+
+#[derive(Deserialize)]
+struct DbConfig {
+    path: String,
+}
+
+#[derive(Deserialize)]
+struct SshConfig {
+    pubkey: Option<String>,
+    #[serde(rename = "pubkey-path")]
+    pubkey_path: Option<String>,
 }
 
 /// Gru configuration
@@ -17,40 +37,30 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_file(path: &str) -> Result<Config, ConfigError> {
-        let conf = Ini::load_from_file(path).map_err(|e| ConfigError { message: e.msg })?;
+    pub fn from_file(path: &str) -> Result<Config, Error> {
+        let mut f = File::open(path)?;
+        let mut buffer = String::new();
+        f.read_to_string(&mut buffer)?;
 
-        let db_section = conf.section(Some("database")).ok_or_else(|| ConfigError {
-            message: "missing database section".to_owned(),
-        })?;
-        let ssh_section = conf.section(Some("ssh")).ok_or_else(|| ConfigError {
-            message: "missing ssh section".to_owned(),
-        })?;
+        let conf: ConfigValues = toml::from_str(&buffer)?;
 
         let mut pubkey = String::new();
-        if let Some(key) = ssh_section.get("pubkey") {
+        if let Some(key) = conf.ssh.pubkey {
             pubkey = key.to_owned();
         } else {
-            let mut file = File::open(ssh_section.get("pubkey-path").ok_or_else(|| ConfigError {
+            let mut keyfile = File::open(conf.ssh.pubkey_path.ok_or_else(|| ConfigError {
                 message: "missing pubkey config".to_owned(),
             })?).map_err(|_| ConfigError {
                 message: "could not open public key file".to_owned(),
             })?;
-            file.read_to_string(&mut pubkey).map_err(|_| ConfigError {
+            keyfile.read_to_string(&mut pubkey).map_err(|_| ConfigError {
                 message: "could not read public key".to_owned(),
             })?;
         }
 
-        let db_path = db_section
-            .get("path")
-            .ok_or_else(|| ConfigError {
-                message: "missing database path".to_owned(),
-            })?
-            .to_owned();
-
         Ok(Config {
             pubkey: pubkey,
-            db_path: db_path,
+            db_path: conf.database.path,
         })
     }
 }
